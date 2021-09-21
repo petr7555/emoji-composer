@@ -1,26 +1,25 @@
-import React from 'react';
-import logo from './logo.svg';
+import React, {useState} from 'react';
+import Canvas from "./components/Canvas";
 import './App.css';
+import axios from "axios";
 
 function App() {
-  return (
-    <div className="App">
-      <header className="App-header">
-        <img src={logo} className="App-logo" alt="logo" />
-        <p>
-          Edit <code>src/App.tsx</code> and save to reload.
-        </p>
-        <a
-          className="App-link"
-          href="https://reactjs.org"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          Learn React
-        </a>
-      </header>
-    </div>
-  );
+    const [emojiName, setEmojiName] = useState("");
+    const [images, setImages] = useState<string[]>([]);
+
+    const handleClick = async () => {
+        const {data} = await axios.get(`http://localhost:5001/emoji/${emojiName}`);
+        setEmojiName("");
+        setImages(images => [...images, data])
+    }
+
+    return (
+        <div>
+            <input placeholder="Emoji name" value={emojiName} onChange={(e) => setEmojiName(e.target.value)}/>
+            <button onClick={handleClick}>Add emoji</button>
+            <Canvas images={images}/>
+        </div>
+    );
 }
 
 export default App;
