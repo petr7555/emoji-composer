@@ -12,26 +12,40 @@ app.get('/', (req, res) => {
   res.send('OK');
 });
 
-app.get('/emoji/:emojiName/:vendor', async (req, res) => {
-  // Get URL params
-  const emojiName = req.params.emojiName;
-  const vendor = req.params.vendor;
+app.get('/emoji/:emojiName/:vendor', async (req, res, next) => {
+  try {
+    // Get URL params
+    const emojiName = req.params.emojiName;
+    const vendor = req.params.vendor;
 
-  // Get Emojipedia page for given emoji
-  const { data: html } = await axios.get(`https://emojipedia.org/${encodeURIComponent(emojiName)}/`);
+    // Get Emojipedia page for given emoji
+    let html;
+    try {
+      const { data } = await axios.get(`https://emojipedia.org/${encodeURIComponent(emojiName)}/`);
+      html = data;
+    } catch (e: unknown) {
+      let message = e;
+      if (axios.isAxiosError(e)) {
+        message = e.message;
+      }
+      return res.status(404).send(message);
+    }
 
-  const $ = cheerio.load(html);
-  const imgTags = $('.vendor-image > img');
+    const $ = cheerio.load(html);
+    const imgTags = $('.vendor-image > img');
 
-  const sources = [...imgTags].map((el) => {
-    return el.attribs.src;
-  });
+    const sources = [...imgTags].map((el) => {
+      return el.attribs.src;
+    });
 
-  const vendorSrc = sources.filter((src) => {
-    return src.includes(vendor);
-  })[0];
+    const vendorSrc = sources.filter((src) => {
+      return src.includes(vendor);
+    })[0];
 
-  res.send(vendorSrc);
+    res.send(vendorSrc);
+  } catch (e) {
+    next(e);
+  }
 });
 
 app.listen(port, () => {

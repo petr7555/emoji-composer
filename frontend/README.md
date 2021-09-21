@@ -10,7 +10,9 @@
 - Fetch emojis from https://emojiapi.dev/ (e.g https://emojiapi.dev/api/v1/red_heart.svg)
 
 ## TODOs
-- some todo
+- Sentry
+- https://daisyui.com/components/kbd to help users type emojis
+- Add a loading circle instead of "ADD" text when request is pending.
 
 ## Available Scripts
 
