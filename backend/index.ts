@@ -1,27 +1,39 @@
-const express = require('express')
-const cors = require('cors')
-const axios = require("axios");
-const cheerio = require("cheerio");
+import express from 'express';
+import cors from 'cors';
+import axios from 'axios';
+import cheerio from 'cheerio';
 
-const app = express()
-app.use(cors())
+const app = express();
+app.use(cors());
 
-const port = 5001
+const port = 5001;
 
 app.get('/', (req, res) => {
-    res.send('Hello World!')
-})
+  res.send('OK');
+});
 
-app.get('/emoji/:emojiName', async (req, res) => {
-    const {data} = await axios.get(`https://emojipedia.org/${req.params.emojiName}/`);
-    const $ = cheerio.load(data);
-    const imgTags = $(".vendor-image > img");
-    const sources = [...imgTags].map( el => el.attribs.src);
-    const appleSrc = sources.filter(src => src.includes("apple"))[0];
+app.get('/emoji/:emojiName/:vendor', async (req, res) => {
+  // Get URL params
+  const emojiName = req.params.emojiName;
+  const vendor = req.params.vendor;
 
-    res.send(appleSrc);
+  // Get Emojipedia page for given emoji
+  const { data: html } = await axios.get(`https://emojipedia.org/${encodeURIComponent(emojiName)}/`);
+
+  const $ = cheerio.load(html);
+  const imgTags = $('.vendor-image > img');
+
+  const sources = [...imgTags].map((el) => {
+    return el.attribs.src;
+  });
+
+  const vendorSrc = sources.filter((src) => {
+    return src.includes(vendor);
+  })[0];
+
+  res.send(vendorSrc);
 });
 
 app.listen(port, () => {
-    console.log(`Example app listening at http://localhost:${port}`)
-})
+  console.log(`Server listening at http://localhost:${port}`);
+});

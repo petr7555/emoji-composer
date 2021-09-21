@@ -1,28 +1,31 @@
-import React, {useEffect, useRef} from 'react';
+import React, { useEffect, useRef } from 'react';
+
+export type CanvasImage = {
+  src: string;
+};
 
 type Props = {
-    images: string[],
-}
+  images: CanvasImage[];
+};
 
-const Canvas = ({images}: Props) => {
+const Canvas = ({ images }: Props): JSX.Element => {
+  const canvasRef = useRef<HTMLCanvasElement>(null);
 
-    const canvasRef = useRef<HTMLCanvasElement>(null);
+  useEffect(() => {
+    const canvas = canvasRef.current;
+    const context = canvas?.getContext('2d');
+    if (context == null) throw new Error('Could not get context of canvas.');
 
-    useEffect(() => {
-        const canvas = canvasRef.current;
-        const context = canvas?.getContext('2d');
-        if (context == null) throw new Error('Could not get context of canvas.');
+    images.forEach((image) => {
+      const img = new Image();
+      img.src = image.src;
+      img.onload = function () {
+        context.drawImage(img, 0, 0);
+      };
+    });
+  }, [images]);
 
-        images.forEach((image) => {
-            const img = new Image()
-            img.src = image;
-            img.onload = function () {
-                context.drawImage(img, 0, 0)
-            }
-        })
-    }, [images])
-
-    return <canvas ref={canvasRef}/>
-}
+  return <canvas ref={canvasRef} />;
+};
 
 export default Canvas;
